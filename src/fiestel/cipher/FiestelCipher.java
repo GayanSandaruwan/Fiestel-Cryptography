@@ -31,8 +31,8 @@ public class FiestelCipher {
     public static void main(String[] args) {
 
         FiestelCipher fc = new FiestelCipher();
-        fc.encrypt(2);
-        fc.decrypt(2);
+        fc.encrypt(10);     // specify the number of rounds to be used in side the brackets
+        fc.decrypt(10);
 
     }
 
@@ -301,10 +301,12 @@ public class FiestelCipher {
                         tempByteStr = "-0" + tempByteStr.substring(1, 3);
                     } else if (tempByteStr.length() == 2) {
                         tempByteStr = "-00" + tempByteStr.substring(1, 2);
-                    } else if (x == 0) {
-                        tempByteStr = "-0000" + tempByteStr.substring(1);
+                    } else if (tempByteStr.length() == 1) {
+                        tempByteStr = "-000" + tempByteStr.substring(1);
                     }
                     byte[] byteVal = tempByteStr.getBytes("US-ASCII");
+//                    System.out.println(tempByteStr);
+//                    System.out.println(byteVal[3]);
                     String finalStrBlock = String.valueOf(byteVal[0]) + String.valueOf(byteVal[1]) + String.valueOf(byteVal[2]) + String.valueOf(byteVal[3]);
                     textToBePrinted += finalStrBlock;
                 } catch (UnsupportedEncodingException ex) {
@@ -315,7 +317,10 @@ public class FiestelCipher {
                     String tempByteStr = String.valueOf(x);
                     if (tempByteStr.length() == 2) {
                         tempByteStr = "+0" + tempByteStr;
-                    } else {
+                    } else if(tempByteStr.length()==1){
+                        tempByteStr = "+00" + tempByteStr;
+                    }
+                    else{
                         tempByteStr = "+" + tempByteStr;
                     }
                     System.out.print(tempByteStr);
