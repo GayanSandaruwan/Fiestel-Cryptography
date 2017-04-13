@@ -22,21 +22,23 @@ import javax.swing.filechooser.FileSystemView;
  * @author Gayan Sandaruwan
  */
 public class FiestelCipher {
-    
+
     public static Scanner scanner = new Scanner(System.in);
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
-        encrypt();
-        decrypt();
-       
+
+        FiestelCipher fc = new FiestelCipher();
+        fc.encrypt(2);
+        fc.decrypt(2);
+
     }
-    
-    public static boolean  encrypt(){
-        
+
+    public boolean encrypt(int rounds) {                                                  
+        /*This function is used to connect internal private functions and provide interface to outside 
+        World!, To protect data, obviously you have to.*/
         System.out.println("Encryption Key , Key Should be 8 charactors only");
         String keyString = scanner.next();
         byte[] key = toASCII(keyString);
@@ -56,29 +58,30 @@ public class FiestelCipher {
         String fileName = file.getName();
         byte[] left;
         byte[] right;
-        String lastcchar ="";
-        int length= text.length();
-        
+        String lastcchar = "";
+        int length = text.length();
+
         if (length % 2 == 0) {
-           left =   toASCII(text.substring(0,length/2));
-           right =   toASCII(text.substring(length/2,length));
+            left = toASCII(text.substring(0, length / 2));
+            right = toASCII(text.substring(length / 2, length));
 
         } else {
-           left =   toASCII(text.substring(0,length/2));
-           right =   toASCII(text.substring(length/2,length-1));
-           lastcchar    =   text.substring(length-1,length);
+            left = toASCII(text.substring(0, length / 2));
+            right = toASCII(text.substring(length / 2, length - 1));
+            lastcchar = text.substring(length - 1, length);
         }
-            byte[] encrypt = nRoundEncrypt(left, right, key, 2);
-            String encryptedText    =   ASCIItoString(encrypt);
-            encryptedText+=lastcchar;
-            
-            writeToFile(fileName+"encrypted.txt", encryptedText);
-            return true;
+        byte[] encrypt = nRoundEncrypt(left, right, key, rounds);
+        String encryptedText = ASCIItoEncryptedString(encrypt);
+        encryptedText += lastcchar;
+
+        writeToFile(fileName + "encrypted.txt", encryptedText);
+        System.out.println("Encrption Successfull");
+        return true;
     }
-    
-    public static boolean decrypt(){
-    
-    System.out.println("Encryption Key , Key Should be 8 charactors only");
+
+    public boolean decrypt(int rounds) {
+
+        System.out.println("Encryption Key , Key Should be 8 charactors only");
         String keyString = scanner.next();
         byte[] key = toASCII(keyString);
 
@@ -97,27 +100,27 @@ public class FiestelCipher {
         String fileName = file.getName();
         byte[] left;
         byte[] right;
-        String lastcchar ="";
-        int length= text.length();
-        
+        String lastcchar = "";
+        int length = text.length();
+
         if (length % 2 == 0) {
-           left =   toASCII(text.substring(0,length/2));
-           right =   toASCII(text.substring(length/2,length));
+            left = fromEncryptedToASCII(text.substring(0, length / 2));
+            right = fromEncryptedToASCII(text.substring(length / 2, length));
 
         } else {
-           left =   toASCII(text.substring(0,length/2));
-           right =   toASCII(text.substring(length/2,length-1));
-           lastcchar    =   text.substring(length-1,length);
+            left = fromEncryptedToASCII(text.substring(0, length / 2));
+            right = fromEncryptedToASCII(text.substring(length / 2, length - 1));
+            lastcchar = text.substring(length - 1, length);
         }
-            byte[] decrypted = nRoundDecrypt(right, left, key, 2);
-            String decryptedText    =   ASCIItoString(decrypted);
-            decryptedText+=lastcchar;
-            
-            writeToFile(fileName+"decrypted.txt", decryptedText);
-            return true;
+        byte[] decrypted = nRoundDecrypt(right, left, key, rounds);
+        String decryptedText = ASCIItoString(decrypted);
+        decryptedText += lastcchar;
+
+        writeToFile(fileName + "decrypted.txt", decryptedText);
+        return true;
     }
 
-    private static byte[] getXOR(byte[] left, byte[] right) {
+    private byte[] getXOR(byte[] left, byte[] right) {
         //System.out.println(left.length);
         //System.out.println(right.length);
         byte[] XOR = new byte[left.length];
@@ -127,37 +130,35 @@ public class FiestelCipher {
         }
         return XOR;
     }
-       private static byte[] getXORKey(byte[] left, byte[] right) {
+
+    private byte[] getXORKey(byte[] left, byte[] right) {
         //System.out.println(left.length);
         //System.out.println(right.length);
         byte[] XOR = new byte[left.length];
 
         for (int i = 0; i < left.length; i++) {
-            XOR[i] = (byte) (left[i] ^ right[i%8]);
+            XOR[i] = (byte) (left[i] ^ right[i % 8]);
         }
         return XOR;
     }
 
-    private static byte[] feistelFunction(byte[] key, byte[] right) {
+    private byte[] feistelFunction(byte[] key, byte[] right) {
 
-        byte[] feisted = getXORKey(right,key);
-//        for (int i = 0; i < right.length; i++) {
-//            feisted[i] = (byte) (right[i] ^ key[i]);
-//        }
-         //System.out.println(ASCIItoString(feisted)+"  feisted");
+        byte[] feisted = getXORKey(right, key);
+        //System.out.println(ASCIItoString(feisted)+"  feisted");
         return feisted;
 
     }
 
-    private static byte[] oneRoundEncrypt(byte[] left, byte[] right, byte[] key) {
+    private byte[] oneRoundEncrypt(byte[] left, byte[] right, byte[] key) {
 
         byte[] newRight = getXOR(feistelFunction(key, right), left);
         //System.out.println(ASCIItoString(key)+"  one Round");
-       // System.out.println(ASCIItoString(newRight));
+        // System.out.println(ASCIItoString(newRight));
         return newRight;
     }
 
-    private static byte[] nRoundEncrypt(byte[] left, byte[] right, byte[] key, int n) {  // n is the number of feistel rounds
+    private byte[] nRoundEncrypt(byte[] left, byte[] right, byte[] key, int n) {  // n is the number of feistel rounds
 
         byte[] leftNew = left;
         byte[] rightNew = right;
@@ -166,8 +167,6 @@ public class FiestelCipher {
             byte[] temp = rightNew;
             rightNew = oneRoundEncrypt(leftNew, rightNew, getRoundKey(key, j));
             leftNew = temp;
-            // System.out.println(ASCIItoString(temp)+" encrypted");
-
         }
 
         byte[] encrypted = new byte[left.length + right.length];
@@ -182,17 +181,29 @@ public class FiestelCipher {
         return encrypted;
     }
 
-    private static byte[] nRoundDecrypt(byte[] left, byte[] right, byte[] key, int n) {  // n is the number of feistel rounds
+    private byte[] nRoundDecrypt(byte[] left, byte[] right, byte[] key, int n) {  // n is the number of feistel rounds
 
         byte[] leftNew = left;
         byte[] rightNew = right;
-
+        System.out.println(ASCIItoEncryptedString(leftNew) + " LeftNew");
+        for (byte x : leftNew) {
+            System.out.print(x + " ");
+        }
+        System.out.println("");
         for (int j = 0; j < n; j++) {
             byte[] temp = rightNew;
-            rightNew = oneRoundEncrypt(leftNew, rightNew, getRoundKeyReverse(key, j, n));
-            leftNew = temp;
-            // System.out.println(ASCIItoString(temp)+" encrypted");
+            rightNew = oneRoundEncrypt(leftNew, rightNew, getRoundKeyReverse(key, j, n));   //Deference between nRoundDecrypt & nRoundEncrypt
+            leftNew = temp;                                                                 // Is that nRoundDecrypt uses getRoundKeyReverse
+            System.out.println(ASCIItoEncryptedString(leftNew) + " LeftNew");
+            for (byte x : leftNew) {
+                System.out.print(x + " ");
+            }
+            System.out.print(ASCIItoEncryptedString(rightNew) + " RightNew");
 
+            for (byte x : rightNew) {
+                System.out.print(x + " ");
+            }
+            System.out.println("");
         }
 
         byte[] encrypted = new byte[left.length + right.length];
@@ -207,7 +218,7 @@ public class FiestelCipher {
         return encrypted;
     }
 
-    private static byte[] getRoundKey(byte[] key, int round) {
+    private byte[] getRoundKey(byte[] key, int round) {
 
         byte[] newKey = new byte[key.length];
 
@@ -216,47 +227,117 @@ public class FiestelCipher {
             //newKey[i]   =   key[i]
             //  System.out.println(ASCIItoString(newKey)+"   Key n");
         }
-                 for(byte x:newKey){
-                System.out.print(x+"  ");
-            }
-             System.out.println("");
+//                 for(byte x:newKey){
+//                System.out.print(x+"  ");
+//            }
+//             System.out.println("");
         return newKey;
     }
 
-    private static byte[] getRoundKeyReverse(byte[] key, int round, int n) {
+    private byte[] getRoundKeyReverse(byte[] key, int round, int n) {
 
         byte[] newKey = new byte[key.length];
 
         for (int i = 0; i < key.length; i++) {
-            newKey[i] = (byte) (key[i] << n - round-1);
+            newKey[i] = (byte) (key[i] << n - round - 1);
             //newKey[i]   =   key[i]
             //  System.out.println(ASCIItoString(newKey)+"   Key n");
         }
-         for(byte x:newKey){
-                System.out.print(x+"  ");
-            }
-            System.out.println("");
+//         for(byte x:newKey){
+//                System.out.print(x+"  ");
+//            }
+//            System.out.println("");
         return newKey;
     }
 
-    private static byte[] toASCII(String str) {
+    private byte[] fromEncryptedToASCII(String str) {
+//        System.out.println(str);
+        byte[] ASCII = new byte[str.length() / 8];
+
+        for (int i = 0; i < str.length() / 8; i++) {
+            try {
+                String tempStr = str.substring(0 + 8 * i, 8 + 8 * i);
+//                System.out.println(tempStr);
+                String intStr = "";
+                byte[] byteVal = new byte[4];
+                for (int j = 0; j < 4; j++) {
+
+                    byteVal[j] = (byte) Integer.parseInt(tempStr.substring(0 + 2 * j, 2 + 2 * j));
+//                    System.out.print(byteVal[j]+ " bv ");
+                }
+                intStr = new String(byteVal, "US-ASCII");
+//                System.out.println(intStr);
+                ASCII[i] = (byte) Integer.parseInt(intStr);
+//                System.out.print(ASCII[i] + "  bytes");
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(FiestelCipher.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return ASCII;
+    }
+
+    private byte[] toASCII(String str) {
 
         byte[] ASCII;
-
         try {
             ASCII = str.getBytes("US-ASCII");
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(FiestelCipher.class.getName()).log(Level.SEVERE, null, ex);
             ASCII = new byte[8];
         }
+
         return ASCII;
     }
 
-    private static String ASCIItoString(byte[] encrpted) {
+    private String ASCIItoEncryptedString(byte[] encrypted) {
 
-        String str;
+        String textToBePrinted = "";
+        for (byte x : encrypted) {
+            if (x <= 0) {
+                try {
+                    String tempByteStr = String.valueOf(x);
+                    if (tempByteStr.length() == 3) {
+                        tempByteStr = "-0" + tempByteStr.substring(1, 3);
+                    } else if (tempByteStr.length() == 2) {
+                        tempByteStr = "-00" + tempByteStr.substring(1, 2);
+                    } else if (x == 0) {
+                        tempByteStr = "-0000" + tempByteStr.substring(1);
+                    }
+                    byte[] byteVal = tempByteStr.getBytes("US-ASCII");
+                    String finalStrBlock = String.valueOf(byteVal[0]) + String.valueOf(byteVal[1]) + String.valueOf(byteVal[2]) + String.valueOf(byteVal[3]);
+                    textToBePrinted += finalStrBlock;
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(FiestelCipher.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                try {
+                    String tempByteStr = String.valueOf(x);
+                    if (tempByteStr.length() == 2) {
+                        tempByteStr = "+0" + tempByteStr;
+                    } else {
+                        tempByteStr = "+" + tempByteStr;
+                    }
+                    System.out.print(tempByteStr);
+                    byte[] byteVal = tempByteStr.getBytes("US-ASCII");
+                    String  finalStrBlock    =   String.valueOf(byteVal[0])+String.valueOf(byteVal[1])+String.valueOf(byteVal[2])+String.valueOf(byteVal[3]);
+                    textToBePrinted += finalStrBlock;
+                    //System.out.print(tempByteStr + "   temp");
+                    
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(FiestelCipher.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        }
+//            System.out.println(str);
+        return textToBePrinted;
+    }
+
+    private String ASCIItoString(byte[] encrypted) {
+        String str = "";
         try {
-            str = new String(encrpted, "UTF-8");
+            str = new String(encrypted, "US-ASCII");
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(FiestelCipher.class.getName()).log(Level.SEVERE, null, ex);
             str = new String();
@@ -264,7 +345,7 @@ public class FiestelCipher {
         return str;
     }
 
-    private static String readFile(File file) {
+    private String readFile(File file) {
 
         BufferedReader br = null;
         String str = "";
@@ -308,9 +389,9 @@ public class FiestelCipher {
         return str;
     }
 
-    private static boolean writeToFile(String filename, String text) {
+    private boolean writeToFile(String filename, String text) {
         try {
-            PrintWriter writer = new PrintWriter(filename, "UTF-8");
+            PrintWriter writer = new PrintWriter(filename, "US-ASCII");
             writer.println(text);
             writer.close();
         } catch (IOException e) {
