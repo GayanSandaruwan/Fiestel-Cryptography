@@ -28,34 +28,34 @@ public class FiestelCipher {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
+//
+////        FiestelCipher fc = new FiestelCipher();
+////        fc.encrypt(10);     // specify the number of rounds to be used in side the brackets
+////        fc.decrypt(10);
+//
+//    }
 
-        FiestelCipher fc = new FiestelCipher();
-        fc.encrypt(10);     // specify the number of rounds to be used in side the brackets
-        fc.decrypt(10);
-
-    }
-
-    public boolean encrypt(int rounds) {                                                  
+    public boolean encrypt(int rounds,String keyString,String text, String fileName ) {                                                  
         /*This function is used to connect internal private functions and provide interface to outside 
         World!, To protect data, obviously you have to.*/
-        System.out.println("Encryption Key , Key Should be 8 charactors only");
-        String keyString = scanner.next();
+//        System.out.println("Encryption Key , Key Should be 8 charactors only");
+//        String keyString = scanner.next();
         byte[] key = toASCII(keyString);
 
-        JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-        File file;
-        int returnValue = jfc.showOpenDialog(null);
+//        JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+//        File file;
+//        int returnValue = jfc.showOpenDialog(null);
+//
+//        if (returnValue == JFileChooser.APPROVE_OPTION) {
+//            file = jfc.getSelectedFile();
+//            System.out.println(file.getAbsolutePath());
+//        } else {
+//            file = null;
+//        }
 
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            file = jfc.getSelectedFile();
-            System.out.println(file.getAbsolutePath());
-        } else {
-            file = null;
-        }
-
-        String text = readFile(file);
-        String fileName = file.getName();
+//        String text = readFile(file);
+//        String fileName = file.getName();
         byte[] left;
         byte[] right;
         String lastcchar = "";
@@ -79,10 +79,10 @@ public class FiestelCipher {
         return true;
     }
 
-    public boolean decrypt(int rounds) {
+    public boolean decrypt(int rounds, String keyString) {
 
-        System.out.println("Encryption Key , Key Should be 8 charactors only");
-        String keyString = scanner.next();
+//        System.out.println("Encryption Key , Key Should be 8 charactors only");
+//        String keyString = scanner.next();
         byte[] key = toASCII(keyString);
 
         JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
